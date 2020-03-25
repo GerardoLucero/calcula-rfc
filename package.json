@@ -1,0 +1,21 @@
+{
+  "name": "calcula-rfc",
+  "version": "1.0.0",
+  "description": "Npm para calcular el RFC con homoclave",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "microbundle"
+  },
+  "author": "Gerardo Lucero",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/preset-env": "^7.9.0",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0",
+    "microbundle": "^0.11.0"
+  },
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
+}
