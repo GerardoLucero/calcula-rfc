@@ -665,7 +665,15 @@ const dic = [
 }
 
 
-function calcularRFCPersonaFisica(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNacimiento_) {
+/**
+ * @param  {string} nombre
+ * @param  {string} primerApellido
+ * @param  {string} segundoApellido
+ * @param  {string} fechaNac - YYYY-MM-DD
+ */
+
+
+module.exports = function(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNacimiento_) {
     try{
         let rfc = null;
 		let nombre;
@@ -710,5 +718,3 @@ function calcularRFCPersonaFisica(nombres_, apellidoPaterno_, apellidoMaterno_, 
         console.error(error.message)
     }
 }
-
-export default calcularRFCPersonaFisica;
