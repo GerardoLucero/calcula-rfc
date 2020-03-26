@@ -666,10 +666,10 @@ const dic = [
 
 
 /**
- * @param  {string} nombre
- * @param  {string} primerApellido
- * @param  {string} segundoApellido
- * @param  {string} fechaNac - YYYY-MM-DD
+ * @param  {string} nombres_
+ * @param  {string} apellidoPaterno_
+ * @param  {string} apellidoMaterno_
+ * @param  {string} fechaNacimiento_ - MM-DD-YYYY
  */
 
 
