@@ -1,6 +1,6 @@
 {
   "name": "calcula-rfc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Npm para calcular el RFC con homoclave",
   "main": "index.js",
   "scripts": {
