@@ -718,3 +718,4 @@ module.exports = function(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNa
         console.error(error.message)
     }
 }
+
