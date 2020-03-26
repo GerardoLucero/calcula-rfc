@@ -1,4 +1,4 @@
-
+"use strict"
 import moment from 'moment'
 /**
  * Clase para calcular el RFC incluyendo la homoclave de una persona en base a
