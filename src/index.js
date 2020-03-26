@@ -673,7 +673,7 @@ const dic = [
  */
 
 
-module.exports = function(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNacimiento_) {
+function calculaRFC(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNacimiento_) {
     try{
         let rfc = null;
 		let nombre;
@@ -719,3 +719,4 @@ module.exports = function(nombres_, apellidoPaterno_, apellidoMaterno_,  fechaNa
     }
 }
 
+export default calculaRFC
