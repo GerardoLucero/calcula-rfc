@@ -1,4 +1,4 @@
-# ��🇽 Calcula RFC
+# Calcula RFC
 
 [![npm version](https://badge.fury.io/js/calcula-rfc.svg)](https://badge.fury.io/js/calcula-rfc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
