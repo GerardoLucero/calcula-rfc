@@ -55,6 +55,9 @@ jobs:
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          
           if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "La versión $PACKAGE_VERSION ya existe en NPM"
@@ -88,7 +91,7 @@ jobs:
             
             Para instalar esta versión:
             ```bash
-            npm install calcula-rfc@${{ steps.check-version.outputs.version }}
+            npm install ${{ steps.check-version.outputs.name }}@${{ steps.check-version.outputs.version }}
             ```
           draft: false
           prerelease: false 
