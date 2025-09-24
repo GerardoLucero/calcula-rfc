@@ -16,7 +16,6 @@ export default [
         // Jest globals
         describe: 'readonly',
         test: 'readonly',
-        it: 'readonly',
         expect: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
@@ -26,37 +25,49 @@ export default [
       }
     },
     rules: {
+      // Error prevention
       'no-unused-vars': ['error', { 
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_' 
       }],
-      'no-console': 'warn',
+      'no-console': ['warn', { 
+        allow: ['warn', 'error'] 
+      }],
+      'no-debugger': 'error',
+      'no-alert': 'error',
+      
+      // Best practices
       'prefer-const': 'error',
       'no-var': 'error',
-      'object-shorthand': 'error',
-      'prefer-arrow-callback': 'error',
-      'arrow-spacing': 'error',
-      'prefer-template': 'error',
-      'template-curly-spacing': 'error',
-      'no-trailing-spaces': 'error',
-      'eol-last': 'error',
-      'comma-dangle': ['error', 'never'],
+      'no-implicit-globals': 'error',
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      
+      // Style
       'quotes': ['error', 'single', { 
         avoidEscape: true,
         allowTemplateLiterals: true 
       }],
       'semi': ['error', 'always'],
-      'indent': ['error', 2],
-      'no-multiple-empty-lines': ['error', { 
-        max: 2,
-        maxEOF: 1 
+      'comma-dangle': ['error', 'never'],
+      'indent': ['error', 2, { 
+        SwitchCase: 1 
+      }],
+      
+      // Modern JS
+      'prefer-arrow-callback': 'error',
+      'prefer-template': 'error',
+      'object-shorthand': 'error',
+      'prefer-destructuring': ['error', {
+        array: false,
+        object: true
       }]
     }
   },
   {
-    files: ['**/*.test.js'],
+    files: ['**/*.test.js', '**/*.spec.js'],
     rules: {
-      'no-console': 'off'
+      'no-console': 'off' // Allow console in tests
     }
   }
 ]; 
