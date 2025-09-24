@@ -1,146 +1,98 @@
-import lib from './index.js';
+import calculaRFC from './index.js';
 
-describe('calculadora-isr', () => {
-  describe('calcularISRMensual', () => {
-    test('debe calcular ISR para ingreso de $15,000', () => {
-      const resultado = lib.calcularISRMensual(15000);
-      expect(resultado).toHaveProperty('ingresoMensual', 15000);
-      expect(resultado).toHaveProperty('isrFinal');
-      expect(resultado).toHaveProperty('ingresoNeto');
-      expect(resultado).toHaveProperty('tasaEfectiva');
-      expect(resultado.isrFinal).toBeGreaterThan(0);
-      expect(resultado.ingresoNeto).toBeLessThan(15000);
+describe('calcula-rfc', () => {
+  describe('calculaRFC', () => {
+    test('debe calcular RFC válido para persona con nombres simples', () => {
+      const rfc = calculaRFC('Juan', 'Perez', 'Garcia', '01/01/1980');
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc).toBe('PEGJ800101LN4');
     });
 
-    test('debe aplicar subsidio para empleos', () => {
-      const resultado = lib.calcularISRMensual(5000, { incluirSubsidio: true });
-      const sinSubsidio = lib.calcularISRMensual(5000, { incluirSubsidio: false });
-      expect(resultado.subsidio).toBeGreaterThan(0);
-      expect(resultado.isrFinal).toBeLessThan(sinSubsidio.isrFinal);
+    test('debe calcular RFC válido con acentos', () => {
+      const rfc = calculaRFC('José', 'Hernández', 'López', '15/12/1975');
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc).toBe('HELJ751215MM0');
     });
 
-    test('debe manejar deducciones personales', () => {
-      const resultado = lib.calcularISRMensual(20000, { deduccionPersonal: 2000 });
-      expect(resultado.deduccionPersonal).toBe(2000);
-      expect(resultado.ingresoGravable).toBe(18000);
+    test('debe calcular RFC válido con Ñ', () => {
+      const rfc = calculaRFC('María', 'Peña', 'Muñoz', '23/08/1990');
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc).toBe('PEMM900823PP5');
     });
 
-    test('debe rechazar ingresos negativos', () => {
-      expect(() => lib.calcularISRMensual(-1000)).toThrow('El ingreso mensual debe ser un número positivo');
+    test('debe manejar nombres compuestos', () => {
+      const rfc = calculaRFC('Juan Carlos', 'De la Torre', 'Martínez', '10/05/1985');
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc).toBe('TOMJ851005314');
     });
 
-    test('debe manejar ingresos muy bajos', () => {
-      const resultado = lib.calcularISRMensual(100);
-      expect(resultado.isrFinal).toBeGreaterThanOrEqual(0);
-      expect(resultado.tasaEfectiva).toBeLessThan(5);
-    });
-  });
-
-  describe('calcularISRAnual', () => {
-    test('debe calcular ISR anual para $180,000', () => {
-      const resultado = lib.calcularISRAnual(180000);
-      expect(resultado).toHaveProperty('ingresoAnual', 180000);
-      expect(resultado).toHaveProperty('isrAnual');
-      expect(resultado).toHaveProperty('ingresoNetoAnual');
-      expect(resultado.isrAnual).toBeGreaterThan(0);
+    test('debe manejar sufijos en apellidos', () => {
+      const rfc = calculaRFC('Pedro', 'González Jr.', 'López', '07/03/1988');
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc).toBe('GOLP880703LE7');
     });
 
-    test('debe aplicar exención de aguinaldo', () => {
-      const resultado = lib.calcularISRAnual(200000, { 
-        deducciones: 10000, 
-        exentoAguinaldo: 15000 
-      });
-      expect(resultado.deducciones).toBe(10000);
-      expect(resultado.aguinaldoExento).toBeGreaterThan(0);
-      expect(resultado.ingresoGravable).toBeLessThan(200000);
+    test('debe evitar palabras obscenas', () => {
+      const rfc = calculaRFC('Fulano', 'Bueno', 'Culo', '01/01/1990');
+      expect(rfc).not.toMatch(/^BUCA/);
+      expect(rfc).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
     });
 
-    test('debe rechazar ingresos negativos', () => {
-      expect(() => lib.calcularISRAnual(-50000)).toThrow('El ingreso anual debe ser un número positivo');
-    });
-  });
-
-  describe('calcularISRHonorarios', () => {
-    test('debe calcular ISR para honorarios', () => {
-      const resultado = lib.calcularISRHonorarios(25000, 5000);
-      expect(resultado).toHaveProperty('ingresosMensuales', 25000);
-      expect(resultado).toHaveProperty('deduccionesMensuales', 5000);
-      expect(resultado).toHaveProperty('utilidad', 20000);
-      expect(resultado).toHaveProperty('retencion');
-      expect(resultado).toHaveProperty('isrAPagar');
-      expect(resultado.retencion).toBe(2500); // 10% de 25000
-    });
-
-    test('debe manejar deducciones mayores a ingresos', () => {
-      const resultado = lib.calcularISRHonorarios(10000, 12000);
-      expect(resultado.utilidad).toBe(0);
+    test('debe aceptar diferentes formatos de fecha', () => {
+      const rfc1 = calculaRFC('Ana', 'López', 'García', '01/01/1990');
+      const rfc2 = calculaRFC('Ana', 'López', 'García', '1990-01-01');
+      const rfc3 = calculaRFC('Ana', 'López', 'García', '01-01-1990');
+      
+      expect(rfc1).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc2).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc3).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      
+      // Todos deberían tener la misma fecha
+      expect(rfc1.substring(4, 10)).toBe('900101');
+      expect(rfc2.substring(4, 10)).toBe('900101');
+      expect(rfc3.substring(4, 10)).toBe('900101');
     });
 
-    test('debe rechazar ingresos negativos', () => {
-      expect(() => lib.calcularISRHonorarios(-5000)).toThrow('Los ingresos deben ser un número positivo');
+    test('debe rechazar parámetros vacíos o inválidos', () => {
+      expect(() => calculaRFC('', 'López', 'García', '01/01/1990')).toThrow();
+      expect(() => calculaRFC('Juan', 'López', 'García', '')).toThrow();
     });
 
-    test('debe rechazar deducciones negativas', () => {
-      expect(() => lib.calcularISRHonorarios(10000, -1000)).toThrow('Las deducciones no pueden ser negativas');
-    });
-  });
-
-  describe('obtenerTarifasISR', () => {
-    test('debe retornar tarifas ISR 2024', () => {
-      const tarifas = lib.obtenerTarifasISR();
-      expect(tarifas).toHaveProperty('año', 2024);
-      expect(tarifas).toHaveProperty('tarifas');
-      expect(tarifas).toHaveProperty('subsidioEmpleo');
-      expect(tarifas).toHaveProperty('uma');
-      expect(Array.isArray(tarifas.tarifas)).toBe(true);
-      expect(tarifas.tarifas.length).toBeGreaterThan(0);
+    test('debe rechazar parámetros null o undefined', () => {
+      expect(() => calculaRFC(null, 'López', 'García', '01/01/1990')).toThrow();
+      expect(() => calculaRFC('Juan', 'López', 'García', null)).toThrow();
     });
 
-    test('debe incluir límites de exención', () => {
-      const tarifas = lib.obtenerTarifasISR();
-      expect(tarifas).toHaveProperty('limitesExencion');
-      expect(tarifas.limitesExencion).toHaveProperty('aguinaldo');
-      expect(tarifas.limitesExencion).toHaveProperty('primaVacacional');
-      expect(tarifas.limitesExencion).toHaveProperty('indemnizacion');
-    });
-  });
-
-  describe('calcularIngresoDesdeISR', () => {
-    test('debe calcular ingreso requerido para ISR específico', () => {
-      const resultado = lib.calcularIngresoDesdeISR(1000);
-      expect(resultado).toHaveProperty('ingresoRequerido');
-      expect(resultado).toHaveProperty('isrCalculado');
-      expect(resultado).toHaveProperty('iteraciones');
-      expect(Math.abs(resultado.isrCalculado - 1000)).toBeLessThan(1);
+    test('debe rechazar fechas claramente inválidas', () => {
+      expect(() => calculaRFC('Juan', 'López', 'García', 'fecha-inválida')).toThrow();
     });
 
-    test('debe rechazar ISR negativo', () => {
-      expect(() => lib.calcularIngresoDesdeISR(-500)).toThrow('El ISR debe ser un número positivo');
+    test('debe manejar casos extremos de fechas', () => {
+      const rfc1 = calculaRFC('Juan', 'López', 'García', '29/02/2000'); // Año bisiesto
+      expect(rfc1).toMatch(/^[A-Z]{4}\d{6}[A-Z0-9]{3}$/);
+      expect(rfc1.substring(4, 10)).toBe('000229');
     });
 
-    test('debe manejar ISR muy alto', () => {
-      const resultado = lib.calcularIngresoDesdeISR(50000);
-      expect(resultado.ingresoRequerido).toBeGreaterThan(100000);
-    });
-  });
-
-  describe('casos edge', () => {
-    test('debe manejar ingreso exacto en límite de tarifa', () => {
-      const resultado = lib.calcularISRMensual(746.04); // Límite primera tarifa
-      expect(resultado.isrFinal).toBeGreaterThanOrEqual(0);
+    test('debe ser consistente en múltiples llamadas', () => {
+      const rfc1 = calculaRFC('María', 'González', 'Rodríguez', '15/07/1985');
+      const rfc2 = calculaRFC('María', 'González', 'Rodríguez', '15/07/1985');
+      expect(rfc1).toBe(rfc2);
     });
 
-    test('debe mantener precisión decimal', () => {
-      const resultado = lib.calcularISRMensual(12345.67);
-      expect(resultado.ingresoMensual).toBe(12345.67);
-      expect(typeof resultado.isrFinal).toBe('number');
-      expect(resultado.isrFinal.toString()).toMatch(/^\d+(\.\d{1,2})?$/);
-    });
-
-    test('debe calcular tasa efectiva correctamente', () => {
-      const resultado = lib.calcularISRMensual(10000);
-      const tasaCalculada = (resultado.isrFinal / resultado.ingresoMensual) * 100;
-      expect(Math.abs(resultado.tasaEfectiva - tasaCalculada)).toBeLessThan(0.01);
+    test('debe generar RFC con estructura correcta', () => {
+      const rfc = calculaRFC('Carlos', 'Martínez', 'Sánchez', '20/11/1992');
+      
+      // Verificar longitud
+      expect(rfc).toHaveLength(13);
+      
+      // Verificar que las primeras 4 letras son del nombre
+      expect(rfc.substring(0, 4)).toMatch(/^[A-Z]{4}$/);
+      
+      // Verificar que los siguientes 6 son la fecha YYMMDD
+      expect(rfc.substring(4, 10)).toBe('921120');
+      
+      // Verificar que los últimos 3 son homoclave
+      expect(rfc.substring(10, 13)).toMatch(/^[A-Z0-9]{3}$/);
     });
   });
 });
