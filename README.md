@@ -1,268 +1,294 @@
-# Calcula RFC
+# validador-fiscal-mx
 
-[![npm version](https://badge.fury.io/js/calcula-rfc.svg)](https://badge.fury.io/js/calcula-rfc)
+[![npm version](https://badge.fury.io/js/validador-fiscal-mx.svg)](https://www.npmjs.com/package/validador-fiscal-mx)
+[![CI/CD Pipeline](https://github.com/GerardoLucero/validador-fiscal-mx/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/GerardoLucero/validador-fiscal-mx/actions)
+[![codecov](https://codecov.io/gh/GerardoLucero/validador-fiscal-mx/branch/main/graph/badge.svg)](https://codecov.io/gh/GerardoLucero/validador-fiscal-mx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/GerardoLucero/calcula-rfc/workflows/Publish%20to%20NPM/badge.svg)](https://github.com/GerardoLucero/calcula-rfc/actions)
-[![Coverage Status](https://coveralls.io/repos/github/GerardoLucero/calcula-rfc/badge.svg?branch=main)](https://coveralls.io/github/GerardoLucero/calcula-rfc?branch=main)
 
-Librería moderna para calcular el **RFC (Registro Federal de Contribuyentes)** mexicano con homoclave de personas físicas, siguiendo el algoritmo oficial del SAT.
+Validación completa de RFC, CURP, NSS y otros identificadores fiscales mexicanos con detección automática de tipo y extracción de información.
 
-## 🚀 Características
+## ✨ Características
 
-- ✅ **Algoritmo oficial del SAT** - Basado en el documento "IFAI 0610100135506 065"
-- ✅ **Cálculo completo** - Incluye homoclave y dígito verificador
-- ✅ **Manejo de acentos** - Normaliza automáticamente caracteres especiales
-- ✅ **Validación de palabras obscenas** - Reemplaza automáticamente según lista oficial
-- ✅ **Múltiples formatos de fecha** - Soporta MM/DD/YYYY, YYYY-MM-DD, DD/MM/YYYY
-- ✅ **TypeScript ready** - Incluye definiciones de tipos
-- ✅ **Zero dependencies** - Solo usa dayjs (más seguro que moment.js)
-- ✅ **Totalmente probado** - Cobertura de tests del 100%
-- ✅ **Moderno** - ES6+, sin vulnerabilidades de seguridad
+- 🔍 **Validación completa** de RFC, CURP, NSS y cédulas profesionales
+- 🤖 **Detección automática** del tipo de identificador
+- 📊 **Extracción de datos** (fecha de nacimiento, sexo, estado, etc.)
+- 🛡️ **Validación robusta** con verificación de dígitos verificadores
+- 🚫 **Filtrado de palabras inconvenientes**
+- 📅 **Validación de fechas** incluyendo años bisiestos
+- 🌐 **Compatible con ES Modules y CommonJS**
+- 📦 **Sin dependencias externas**
+- ⚡ **Ligero y rápido**
 
-## 📦 Instalación
+## 🚀 Instalación
 
 ```bash
-npm install calcula-rfc
+npm install validador-fiscal-mx
 ```
 
-```bash
-yarn add calcula-rfc
-```
-
-```bash
-pnpm add calcula-rfc
-```
-
-## 🔧 Uso
-
-### Importación
+## 📖 Uso Básico
 
 ```javascript
-// ES6 Modules
-import calculaRFC from 'calcula-rfc';
+import validadorFiscal from 'validador-fiscal-mx';
 
-// CommonJS
-const calculaRFC = require('calcula-rfc');
+// Validar RFC
+const esRFCValido = validadorFiscal.validarRFC('PEGJ850115AB1');
+console.log(esRFCValido); // true
+
+// Validar CURP
+const esCURPValida = validadorFiscal.validarCURP('PEGJ850115HJCRRL09');
+console.log(esCURPValida); // true
+
+// Detectar tipo automáticamente
+const tipo = validadorFiscal.detectarTipo('12345678901');
+console.log(tipo); // 'NSS'
+
+// Validación completa con detalles
+const resultado = validadorFiscal.validarIdentificador('PEGJ850115AB1');
+console.log(resultado);
+/*
+{
+  identificador: 'PEGJ850115AB1',
+  tipo: 'RFC',
+  esValido: true,
+  detalles: {
+    tipoPersona: 'FISICA',
+    iniciales: 'PEGJ',
+    fechaNacimiento: '15/01/1985',
+    homoclave: 'AB',
+    digitoVerificador: '1'
+  }
+}
+*/
 ```
 
-### Ejemplos básicos
+## 🔧 API Completa
+
+### `validarRFC(rfc: string): boolean`
+
+Valida un RFC mexicano (persona física o moral).
 
 ```javascript
-// Persona con ambos apellidos
-const rfc1 = calculaRFC('JUAN CARLOS', 'PEREZ', 'GOMEZ', '01/15/1985');
-console.log(rfc1); // PEGJ850115AB1
-
-// Persona con solo apellido paterno
-const rfc2 = calculaRFC('MARIA', 'LOPEZ', '', '12/25/1990');
-console.log(rfc2); // LOMA901225XY2
-
-// Persona con solo apellido materno
-const rfc3 = calculaRFC('CARLOS', '', 'HERNANDEZ', '06/10/1988');
-console.log(rfc3); // HECA880610ZB3
+validadorFiscal.validarRFC('PEGJ850115AB1'); // true - Persona física
+validadorFiscal.validarRFC('ABC123456T1A'); // true - Persona moral
+validadorFiscal.validarRFC('INVALID123');   // false
 ```
 
-### Manejo de acentos y caracteres especiales
+### `validarCURP(curp: string): boolean`
+
+Valida una CURP mexicana con verificación completa.
 
 ```javascript
-// La librería normaliza automáticamente los acentos
-const rfc = calculaRFC('JOSÉ MARÍA', 'PÉREZ', 'LÓPEZ', '05/15/1987');
-console.log(rfc); // PELJ870515CD4
-
-// También maneja la letra Ñ
-const rfcÑ = calculaRFC('ANTONIO', 'MUÑOZ', 'PEÑA', '08/30/1992');
-console.log(rfcÑ); // MUPA920830EF5
+validadorFiscal.validarCURP('PEGJ850115HJCRRL09'); // true
+validadorFiscal.validarCURP('GOJA920814MMCRNS04'); // true
+validadorFiscal.validarCURP('INVALID123456789');   // false
 ```
 
-### Diferentes formatos de fecha
+### `validarNSS(nss: string): boolean`
+
+Valida un Número de Seguridad Social del IMSS.
 
 ```javascript
-// Formato MM/DD/YYYY (recomendado)
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '01/15/1985');
-
-// Formato YYYY-MM-DD (ISO)
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '1985-01-15');
-
-// Formato DD/MM/YYYY
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '15/01/1985');
+validadorFiscal.validarNSS('12345678901');    // true
+validadorFiscal.validarNSS('12-34-56-78901'); // true (con guiones)
+validadorFiscal.validarNSS('00000000000');    // false (patrón inválido)
 ```
 
-## 📋 API
+### `validarCedula(cedula: string): boolean`
 
-### `calculaRFC(nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento)`
-
-Calcula el RFC completo de una persona física.
-
-#### Parámetros
-
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `nombres` | `string` | ✅ Sí | Nombres de la persona |
-| `apellidoPaterno` | `string` | ⚠️ Condicional | Apellido paterno (requerido si no hay materno) |
-| `apellidoMaterno` | `string` | ⚠️ Condicional | Apellido materno (requerido si no hay paterno) |
-| `fechaNacimiento` | `string` | ✅ Sí | Fecha de nacimiento en formato válido |
-
-#### Valor de retorno
-
-- **Tipo**: `string`
-- **Formato**: RFC de 13 caracteres (4 letras + 6 dígitos + 3 alfanuméricos)
-- **Ejemplo**: `PEGJ850115AB1`
-
-#### Excepciones
-
-La función lanza errores en los siguientes casos:
+Valida una cédula profesional SEP.
 
 ```javascript
-// Error: nombres vacío o nulo
-calculaRFC('', 'PEREZ', 'LOPEZ', '01/01/1990');
-// Error: El parámetro [nombres] es requerido y no puede estar vacío
-
-// Error: ambos apellidos vacíos
-calculaRFC('JUAN', '', '', '01/01/1990');
-// Error: Al menos uno de los apellidos (paterno o materno) debe ser proporcionado
-
-// Error: fecha inválida
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', 'fecha-invalida');
-// Error: La fecha de nacimiento debe tener un formato válido
+validadorFiscal.validarCedula('1234567');  // true (7 dígitos)
+validadorFiscal.validarCedula('12345678'); // true (8 dígitos)
+validadorFiscal.validarCedula('1111111');  // false (todos iguales)
 ```
 
-## 🧪 Ejemplos avanzados
+### `detectarTipo(identificador: string): string`
 
-### Manejo de sufijos
-
-La librería ignora automáticamente sufijos comunes:
+Detecta automáticamente el tipo de identificador.
 
 ```javascript
-// Ignora "MARIA" en nombres
-const rfc1 = calculaRFC('MARIA GUADALUPE', 'GARCIA', 'LOPEZ', '01/01/1990');
-const rfc2 = calculaRFC('GUADALUPE', 'GARCIA', 'LOPEZ', '01/01/1990');
-// rfc1 y rfc2 generan el mismo resultado para las primeras 4 letras
-
-// Ignora "DE", "DEL", "LA" en apellidos
-const rfc3 = calculaRFC('PEDRO', 'DE LA CRUZ', 'MARTINEZ', '12/12/1985');
-console.log(rfc3); // CAMP851212GH6 (ignora "DE LA")
+validadorFiscal.detectarTipo('PEGJ850115AB1');      // 'RFC'
+validadorFiscal.detectarTipo('PEGJ850115HJCRRL09'); // 'CURP'
+validadorFiscal.detectarTipo('12345678901');        // 'NSS'
+validadorFiscal.detectarTipo('1234567');            // 'CEDULA'
+validadorFiscal.detectarTipo('INVALID');            // 'DESCONOCIDO'
 ```
 
-### Validación de palabras obscenas
+### `validarIdentificador(identificador: string): object`
+
+Validación completa con extracción de información.
 
 ```javascript
-// Si el algoritmo genera una palabra obscena, se reemplaza automáticamente
-const rfc = calculaRFC('ARMANDO', 'COCA', '', '01/01/1990');
-// Si genera "COCA", se cambia automáticamente a "COCX"
+const resultado = validadorFiscal.validarIdentificador('PEGJ850115HJCRRL09');
+/*
+{
+  identificador: 'PEGJ850115HJCRRL09',
+  tipo: 'CURP',
+  esValido: true,
+  detalles: {
+    iniciales: 'PEGJ',
+    fechaNacimiento: '15/01/1985',
+    sexo: 'HOMBRE',
+    estadoNacimiento: 'HIDALGO',
+    consonantesInternas: 'RRL',
+    digitoVerificador: '9'
+  }
+}
+*/
 ```
 
-## 🏗️ Estructura del RFC
+## 🎯 Ejemplos Avanzados
 
-El RFC generado tiene la siguiente estructura:
+### Validación por lotes
 
+```javascript
+const identificadores = [
+  'PEGJ850115AB1',
+  'PEGJ850115HJCRRL09',
+  '12345678901',
+  'INVALID123'
+];
+
+const resultados = identificadores.map(id => 
+  validadorFiscal.validarIdentificador(id)
+);
+
+const validos = resultados.filter(r => r.esValido);
+console.log(`${validos.length} de ${identificadores.length} son válidos`);
 ```
-P E G J 85 01 15 A B 1
-│ │ │ │  │  │  │  │ │ │
-│ │ │ │  │  │  │  │ │ └─ Dígito verificador
-│ │ │ │  │  │  │  └─┴─── Homoclave (2 caracteres)
-│ │ │ │  │  └──┴──────── Día de nacimiento
-│ │ │ │  └─────────────── Mes de nacimiento  
-│ │ │ └────────────────── Año de nacimiento (2 dígitos)
-│ │ └─────────────────── Primera letra del nombre
-│ └───────────────────── Primera vocal interna del apellido paterno
-└─────────────────────── Primera letra del apellido paterno
+
+### Extracción de información específica
+
+```javascript
+function analizarRFC(rfc) {
+  const resultado = validadorFiscal.validarIdentificador(rfc);
+  
+  if (resultado.esValido && resultado.tipo === 'RFC') {
+    const { detalles } = resultado;
+    return {
+      esPersonaFisica: detalles.tipoPersona === 'FISICA',
+      fechaNacimiento: detalles.fechaNacimiento,
+      iniciales: detalles.iniciales
+    };
+  }
+  
+  return null;
+}
+
+const info = analizarRFC('PEGJ850115AB1');
+console.log(info);
+// { esPersonaFisica: true, fechaNacimiento: '15/01/1985', iniciales: 'PEGJ' }
 ```
 
-## 🔒 Seguridad
+### Validación con manejo de errores
 
-Esta versión 2.0 resuelve todas las vulnerabilidades de seguridad de la versión anterior:
+```javascript
+function validarDocumento(documento, tipoEsperado = null) {
+  try {
+    const resultado = validadorFiscal.validarIdentificador(documento);
+    
+    if (!resultado.esValido) {
+      throw new Error(`Documento inválido: ${documento}`);
+    }
+    
+    if (tipoEsperado && resultado.tipo !== tipoEsperado) {
+      throw new Error(`Se esperaba ${tipoEsperado}, pero se detectó ${resultado.tipo}`);
+    }
+    
+    return resultado;
+    
+  } catch (error) {
+    console.error('Error de validación:', error.message);
+    return null;
+  }
+}
 
-- ✅ **Reemplazado moment.js** por dayjs (sin vulnerabilidades)
-- ✅ **Dependencias actualizadas** a versiones seguras
-- ✅ **Sin dependencias vulnerables** según npm audit
-- ✅ **Código moderno** sin patrones inseguros
+// Uso
+const resultado = validarDocumento('PEGJ850115AB1', 'RFC');
+```
 
 ## 🧪 Testing
 
 ```bash
-# Ejecutar todos los tests
-npm test
-
-# Ejecutar tests con cobertura
-npm run test:coverage
-
-# Ejecutar tests en modo watch
-npm run test:watch
-```
-
-## 🛠️ Desarrollo
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/GerardoLucero/calcula-rfc.git
-cd calcula-rfc
-
-# Instalar dependencias
-npm install
-
 # Ejecutar tests
 npm test
 
-# Ejecutar linter
-npm run lint
+# Tests con coverage
+npm run test:coverage
 
-# Compilar para producción
-npm run build:prod
+# Tests en modo watch
+npm run test:watch
 ```
 
-## 📊 Compatibilidad
+## 📋 Formatos Soportados
 
-- **Node.js**: >= 14.0.0
-- **Navegadores**: Todos los navegadores modernos
-- **TypeScript**: Incluye definiciones de tipos
+### RFC (Registro Federal de Contribuyentes)
+- **Persona Física**: 4 letras + 6 dígitos + 3 caracteres alfanuméricos
+- **Persona Moral**: 3 letras + 6 dígitos + 3 caracteres alfanuméricos
+- Ejemplo: `PEGJ850115AB1`, `ABC123456T1A`
 
-## 🤝 Contribuciones
+### CURP (Clave Única de Registro de Población)
+- 18 caracteres: 4 letras + 6 dígitos + H/M + 2 letras + 3 letras + 1 dígito/letra + 1 dígito
+- Ejemplo: `PEGJ850115HJCRRL09`
 
-Las contribuciones son bienvenidas. Para cambios importantes:
+### NSS (Número de Seguridad Social)
+- 11 dígitos (con o sin guiones)
+- Ejemplo: `12345678901`, `12-34-56-78901`
 
-1. Abre un issue para discutir el cambio
-2. Haz fork del proyecto
-3. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-4. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-5. Push a la rama (`git push origin feature/AmazingFeature`)
-6. Abre un Pull Request
+### Cédula Profesional
+- 7 u 8 dígitos
+- Ejemplo: `1234567`, `12345678`
 
-Asegúrate de que los tests pasen:
+## 🔒 Validaciones Implementadas
 
-```bash
-npm test
-npm run lint
-```
+- ✅ Formato y estructura correcta
+- ✅ Fechas de nacimiento válidas (incluyendo años bisiestos)
+- ✅ Estados válidos en CURP
+- ✅ Sexo válido en CURP (H/M)
+- ✅ Dígitos verificadores correctos
+- ✅ Filtrado de palabras inconvenientes
+- ✅ Patrones de números consecutivos o repetitivos
+- ✅ Rangos de fechas lógicos
 
-## 📝 Changelog
+## 🌐 Compatibilidad
 
-### v2.0.0 (2024)
-- 🚨 **BREAKING**: Reemplazado moment.js por dayjs
-- ✨ Dependencias actualizadas a versiones modernas
-- 🔒 Resueltas todas las vulnerabilidades de seguridad
-- 📚 Documentación completamente reescrita
-- 🧪 Suite de tests ampliada y mejorada
-- 🏗️ Pipeline CI/CD con GitHub Actions
-- 📦 Build optimizado con microbundle
+- ✅ Node.js 14+
+- ✅ Navegadores modernos (ES2020+)
+- ✅ ES Modules
+- ✅ CommonJS
+- ✅ TypeScript (definiciones incluidas)
 
-### v1.0.3 (2019)
-- Versión inicial con moment.js
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Por favor:
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+### Convenciones de Commits
+
+- `feat:` - Nueva funcionalidad
+- `fix:` - Corrección de bugs
+- `docs:` - Cambios en documentación
+- `test:` - Agregar o modificar tests
+- `refactor:` - Refactoring de código
+- `chore:` - Tareas de mantenimiento
 
 ## 📄 Licencia
 
 MIT © [Gerardo Lucero](https://github.com/GerardoLucero)
 
----
+## 🔗 Enlaces
 
-## 🆘 Soporte
-
-Si encuentras algún problema o tienes preguntas:
-
-- 🐛 [Reportar un bug](https://github.com/GerardoLucero/calcula-rfc/issues)
-- 💡 [Solicitar una feature](https://github.com/GerardoLucero/calcula-rfc/issues)
-- 📧 [Contacto directo](mailto:tu-email@ejemplo.com)
+- [Documentación completa](https://github.com/GerardoLucero/validador-fiscal-mx)
+- [NPM Package](https://www.npmjs.com/package/validador-fiscal-mx)
+- [Reportar Issues](https://github.com/GerardoLucero/validador-fiscal-mx/issues)
+- [Changelog](https://github.com/GerardoLucero/validador-fiscal-mx/releases)
 
 ---
 
-**¿Te gusta este proyecto?** ⭐ ¡Dale una estrella en GitHub!
-
-**¿Necesitas calcular CURP también?** 👀 Revisa nuestros otros proyectos relacionados.
+Desarrollado con ❤️ para la comunidad mexicana de desarrolladores.
