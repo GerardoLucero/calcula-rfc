@@ -1,6 +1,6 @@
 {
   "name": "calcula-rfc",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "type": "module",
   "description": "Librería para calcular el RFC (Registro Federal de Contribuyentes) mexicano con homoclave de personas físicas",
   "main": "dist/index.js",
