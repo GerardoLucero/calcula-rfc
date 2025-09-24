@@ -292,3 +292,4 @@ MIT © [Gerardo Lucero](https://github.com/GerardoLucero)
 ---
 
 Desarrollado con ❤️ para la comunidad mexicana de desarrolladores.
+
