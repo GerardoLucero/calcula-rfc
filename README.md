@@ -1,295 +1,222 @@
-# validador-fiscal-mx
+# mx-feriados
 
-[![npm version](https://badge.fury.io/js/validador-fiscal-mx.svg)](https://www.npmjs.com/package/validador-fiscal-mx)
-[![CI/CD Pipeline](https://github.com/GerardoLucero/validador-fiscal-mx/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/GerardoLucero/validador-fiscal-mx/actions)
-[![codecov](https://codecov.io/gh/GerardoLucero/validador-fiscal-mx/branch/main/graph/badge.svg)](https://codecov.io/gh/GerardoLucero/validador-fiscal-mx)
+[![npm version](https://badge.fury.io/js/mx-feriados.svg)](https://badge.fury.io/js/mx-feriados)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Validación completa de RFC, CURP, NSS y otros identificadores fiscales mexicanos con detección automática de tipo y extracción de información.
+Librería completa para el manejo de días festivos oficiales mexicanos con cálculo automático de fechas móviles y días hábiles.
 
-## ✨ Características
+## Características
 
-- 🔍 **Validación completa** de RFC, CURP, NSS y cédulas profesionales
-- 🤖 **Detección automática** del tipo de identificador
-- 📊 **Extracción de datos** (fecha de nacimiento, sexo, estado, etc.)
-- 🛡️ **Validación robusta** con verificación de dígitos verificadores
-- 🚫 **Filtrado de palabras inconvenientes**
-- 📅 **Validación de fechas** incluyendo años bisiestos
-- 🌐 **Compatible con ES Modules y CommonJS**
-- 📦 **Sin dependencias externas**
-- ⚡ **Ligero y rápido**
+- Catálogo completo de feriados oficiales mexicanos
+- Cálculo automático de fechas móviles (Semana Santa, etc.)
+- Detección de días feriados
+- Cálculo de días hábiles entre fechas
+- Filtrado por tipo de feriado (oficial, religioso, opcional)
+- Estadísticas anuales de feriados
+- Soporte para años futuros y pasados
 
-## 🚀 Instalación
+## Instalación
 
 ```bash
-npm install validador-fiscal-mx
+npm install mx-feriados
 ```
 
-## 📖 Uso Básico
+## Uso Básico
 
 ```javascript
-import validadorFiscal from 'validador-fiscal-mx';
+import { 
+  getFeriados, 
+  esFeriado, 
+  calcularDiasHabiles,
+  siguienteFeriado 
+} from 'mx-feriados';
 
-// Validar RFC
-const esRFCValido = validadorFiscal.validarRFC('PEGJ850115AB1');
-console.log(esRFCValido); // true
+// Obtener feriados del año actual
+const feriados2024 = getFeriados(2024);
+console.log(feriados2024.length); // 24+ feriados
 
-// Validar CURP
-const esCURPValida = validadorFiscal.validarCURP('PEGJ850115HJCRRL09');
-console.log(esCURPValida); // true
+// Verificar si una fecha es feriado
+const esAnoNuevo = esFeriado(new Date(2024, 0, 1));
+console.log(esAnoNuevo.nombre); // "Año Nuevo"
 
-// Detectar tipo automáticamente
-const tipo = validadorFiscal.detectarTipo('12345678901');
-console.log(tipo); // 'NSS'
+// Calcular días hábiles entre fechas
+const diasHabiles = calcularDiasHabiles(
+  new Date(2024, 0, 1),
+  new Date(2024, 0, 31)
+);
+console.log(diasHabiles.diasHabiles); // 22
 
-// Validación completa con detalles
-const resultado = validadorFiscal.validarIdentificador('PEGJ850115AB1');
-console.log(resultado);
-/*
-{
-  identificador: 'PEGJ850115AB1',
-  tipo: 'RFC',
-  esValido: true,
-  detalles: {
-    tipoPersona: 'FISICA',
-    iniciales: 'PEGJ',
-    fechaNacimiento: '15/01/1985',
-    homoclave: 'AB',
-    digitoVerificador: '1'
-  }
+// Encontrar el siguiente feriado
+const proximo = siguienteFeriado(new Date());
+console.log(proximo.nombre, proximo.fecha);
+```
+
+## API
+
+### getFeriados(año?, opciones?)
+
+Retorna todos los feriados de un año específico.
+
+```javascript
+const feriados = getFeriados(2024);
+// Retorna: Array de objetos feriado
+
+const feriadosOficiales = getFeriados(2024, { soloOficiales: true });
+// Solo feriados oficiales obligatorios
+```
+
+### esFeriado(fecha, opciones?)
+
+Verifica si una fecha específica es feriado.
+
+```javascript
+const resultado = esFeriado(new Date(2024, 0, 1));
+// Retorna: objeto con datos del feriado o null
+
+if (resultado) {
+  console.log(resultado.nombre); // "Año Nuevo"
+  console.log(resultado.tipo);   // "oficial"
 }
-*/
 ```
 
-## 🔧 API Completa
+### siguienteFeriado(fecha?, opciones?)
 
-### `validarRFC(rfc: string): boolean`
-
-Valida un RFC mexicano (persona física o moral).
+Encuentra el próximo feriado desde una fecha dada.
 
 ```javascript
-validadorFiscal.validarRFC('PEGJ850115AB1'); // true - Persona física
-validadorFiscal.validarRFC('ABC123456T1A'); // true - Persona moral
-validadorFiscal.validarRFC('INVALID123');   // false
+const proximo = siguienteFeriado(new Date());
+// Retorna: { fecha, nombre, tipo, ... }
 ```
 
-### `validarCURP(curp: string): boolean`
+### calcularDiasHabiles(fechaInicio, fechaFin, opciones?)
 
-Valida una CURP mexicana con verificación completa.
-
-```javascript
-validadorFiscal.validarCURP('PEGJ850115HJCRRL09'); // true
-validadorFiscal.validarCURP('GOJA920814MMCRNS04'); // true
-validadorFiscal.validarCURP('INVALID123456789');   // false
-```
-
-### `validarNSS(nss: string): boolean`
-
-Valida un Número de Seguridad Social del IMSS.
+Calcula días hábiles entre dos fechas excluyendo feriados.
 
 ```javascript
-validadorFiscal.validarNSS('12345678901');    // true
-validadorFiscal.validarNSS('12-34-56-78901'); // true (con guiones)
-validadorFiscal.validarNSS('00000000000');    // false (patrón inválido)
-```
-
-### `validarCedula(cedula: string): boolean`
-
-Valida una cédula profesional SEP.
-
-```javascript
-validadorFiscal.validarCedula('1234567');  // true (7 dígitos)
-validadorFiscal.validarCedula('12345678'); // true (8 dígitos)
-validadorFiscal.validarCedula('1111111');  // false (todos iguales)
-```
-
-### `detectarTipo(identificador: string): string`
-
-Detecta automáticamente el tipo de identificador.
-
-```javascript
-validadorFiscal.detectarTipo('PEGJ850115AB1');      // 'RFC'
-validadorFiscal.detectarTipo('PEGJ850115HJCRRL09'); // 'CURP'
-validadorFiscal.detectarTipo('12345678901');        // 'NSS'
-validadorFiscal.detectarTipo('1234567');            // 'CEDULA'
-validadorFiscal.detectarTipo('INVALID');            // 'DESCONOCIDO'
-```
-
-### `validarIdentificador(identificador: string): object`
-
-Validación completa con extracción de información.
-
-```javascript
-const resultado = validadorFiscal.validarIdentificador('PEGJ850115HJCRRL09');
-/*
-{
-  identificador: 'PEGJ850115HJCRRL09',
-  tipo: 'CURP',
-  esValido: true,
-  detalles: {
-    iniciales: 'PEGJ',
-    fechaNacimiento: '15/01/1985',
-    sexo: 'HOMBRE',
-    estadoNacimiento: 'HIDALGO',
-    consonantesInternas: 'RRL',
-    digitoVerificador: '9'
-  }
-}
-*/
-```
-
-## 🎯 Ejemplos Avanzados
-
-### Validación por lotes
-
-```javascript
-const identificadores = [
-  'PEGJ850115AB1',
-  'PEGJ850115HJCRRL09',
-  '12345678901',
-  'INVALID123'
-];
-
-const resultados = identificadores.map(id => 
-  validadorFiscal.validarIdentificador(id)
+const resultado = calcularDiasHabiles(
+  new Date(2024, 0, 1),
+  new Date(2024, 0, 31)
 );
 
-const validos = resultados.filter(r => r.esValido);
-console.log(`${validos.length} de ${identificadores.length} son válidos`);
+console.log(resultado.diasHabiles);     // 22
+console.log(resultado.feriadosEnRango); // Array de feriados en el rango
+console.log(resultado.finesSemana);     // Cantidad de fines de semana
 ```
 
-### Extracción de información específica
+### getFeriadosPorTipo(año, tipo)
+
+Filtra feriados por tipo específico.
 
 ```javascript
-function analizarRFC(rfc) {
-  const resultado = validadorFiscal.validarIdentificador(rfc);
-  
-  if (resultado.esValido && resultado.tipo === 'RFC') {
-    const { detalles } = resultado;
-    return {
-      esPersonaFisica: detalles.tipoPersona === 'FISICA',
-      fechaNacimiento: detalles.fechaNacimiento,
-      iniciales: detalles.iniciales
-    };
-  }
-  
-  return null;
-}
-
-const info = analizarRFC('PEGJ850115AB1');
-console.log(info);
-// { esPersonaFisica: true, fechaNacimiento: '15/01/1985', iniciales: 'PEGJ' }
+const oficiales = getFeriadosPorTipo(2024, 'oficial');
+const religiosos = getFeriadosPorTipo(2024, 'religioso');
+const opcionales = getFeriadosPorTipo(2024, 'opcional');
 ```
 
-### Validación con manejo de errores
+### getEstadisticasFeriados(año)
+
+Obtiene estadísticas completas de feriados del año.
 
 ```javascript
-function validarDocumento(documento, tipoEsperado = null) {
-  try {
-    const resultado = validadorFiscal.validarIdentificador(documento);
-    
-    if (!resultado.esValido) {
-      throw new Error(`Documento inválido: ${documento}`);
-    }
-    
-    if (tipoEsperado && resultado.tipo !== tipoEsperado) {
-      throw new Error(`Se esperaba ${tipoEsperado}, pero se detectó ${resultado.tipo}`);
-    }
-    
-    return resultado;
-    
-  } catch (error) {
-    console.error('Error de validación:', error.message);
-    return null;
-  }
+const stats = getEstadisticasFeriados(2024);
+console.log(stats);
+/*
+{
+  año: 2024,
+  total: 24,
+  oficiales: 7,
+  religiosos: 4,
+  opcionales: 13,
+  feriadosPorMes: { enero: 2, febrero: 2, ... },
+  feriadosMovidos: 0
 }
-
-// Uso
-const resultado = validarDocumento('PEGJ850115AB1', 'RFC');
+*/
 ```
 
-## 🧪 Testing
+## Tipos de Feriados
+
+### Oficiales
+Feriados establecidos por ley federal:
+- Año Nuevo (1 enero)
+- Día de la Constitución (primer lunes de febrero)
+- Natalicio de Benito Juárez (tercer lunes de marzo)
+- Día del Trabajo (1 mayo)
+- Día de la Independencia (16 septiembre)
+- Día de la Revolución (tercer lunes de noviembre)
+- Navidad (25 diciembre)
+
+### Religiosos
+Fechas móviles basadas en el calendario litúrgico:
+- Jueves Santo
+- Viernes Santo
+- Sábado de Gloria
+- Domingo de Resurrección
+
+### Opcionales
+Celebraciones tradicionales no oficiales:
+- Día de Reyes (6 enero)
+- Día de la Candelaria (2 febrero)
+- Día de San Valentín (14 febrero)
+- Día de las Madres (10 mayo)
+- Y muchos más...
+
+## Cálculo de Semana Santa
+
+La librería incluye el algoritmo completo para calcular las fechas de Semana Santa:
+
+```javascript
+// Las fechas se calculan automáticamente cada año
+const feriados = getFeriados(2024);
+const semanaSanta = feriados.filter(f => f.tipo === 'religioso');
+
+semanaSanta.forEach(feriado => {
+  console.log(feriado.nombre, feriado.fecha);
+});
+```
+
+## Opciones de Configuración
+
+```javascript
+const opciones = {
+  incluirOpcionales: true,    // Incluir feriados no oficiales
+  soloOficiales: false,       // Solo feriados oficiales
+  incluirReligiosos: true,    // Incluir feriados religiosos
+  incluirFinesSemana: true    // Considerar fines de semana en cálculos
+};
+
+const feriados = getFeriados(2024, opciones);
+```
+
+## Desarrollo
 
 ```bash
+# Instalar dependencias
+npm install
+
 # Ejecutar tests
 npm test
 
-# Tests con coverage
-npm run test:coverage
+# Linting
+npm run lint
 
-# Tests en modo watch
-npm run test:watch
+# Build
+npm run build
 ```
 
-## 📋 Formatos Soportados
-
-### RFC (Registro Federal de Contribuyentes)
-- **Persona Física**: 4 letras + 6 dígitos + 3 caracteres alfanuméricos
-- **Persona Moral**: 3 letras + 6 dígitos + 3 caracteres alfanuméricos
-- Ejemplo: `PEGJ850115AB1`, `ABC123456T1A`
-
-### CURP (Clave Única de Registro de Población)
-- 18 caracteres: 4 letras + 6 dígitos + H/M + 2 letras + 3 letras + 1 dígito/letra + 1 dígito
-- Ejemplo: `PEGJ850115HJCRRL09`
-
-### NSS (Número de Seguridad Social)
-- 11 dígitos (con o sin guiones)
-- Ejemplo: `12345678901`, `12-34-56-78901`
-
-### Cédula Profesional
-- 7 u 8 dígitos
-- Ejemplo: `1234567`, `12345678`
-
-## 🔒 Validaciones Implementadas
-
-- ✅ Formato y estructura correcta
-- ✅ Fechas de nacimiento válidas (incluyendo años bisiestos)
-- ✅ Estados válidos en CURP
-- ✅ Sexo válido en CURP (H/M)
-- ✅ Dígitos verificadores correctos
-- ✅ Filtrado de palabras inconvenientes
-- ✅ Patrones de números consecutivos o repetitivos
-- ✅ Rangos de fechas lógicos
-
-## 🌐 Compatibilidad
-
-- ✅ Node.js 14+
-- ✅ Navegadores modernos (ES2020+)
-- ✅ ES Modules
-- ✅ CommonJS
-- ✅ TypeScript (definiciones incluidas)
-
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Por favor:
+## Contribuir
 
 1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
 5. Abre un Pull Request
 
-### Convenciones de Commits
+## Licencia
 
-- `feat:` - Nueva funcionalidad
-- `fix:` - Corrección de bugs
-- `docs:` - Cambios en documentación
-- `test:` - Agregar o modificar tests
-- `refactor:` - Refactoring de código
-- `chore:` - Tareas de mantenimiento
+MIT - ver [LICENSE](LICENSE) para más detalles.
 
-## 📄 Licencia
+## Soporte
 
-MIT © [Gerardo Lucero](https://github.com/GerardoLucero)
-
-## 🔗 Enlaces
-
-- [Documentación completa](https://github.com/GerardoLucero/validador-fiscal-mx)
-- [NPM Package](https://www.npmjs.com/package/validador-fiscal-mx)
-- [Reportar Issues](https://github.com/GerardoLucero/validador-fiscal-mx/issues)
-- [Changelog](https://github.com/GerardoLucero/validador-fiscal-mx/releases)
-
----
-
-Desarrollado con ❤️ para la comunidad mexicana de desarrolladores.
+- [Issues](https://github.com/GerardoLucero/mx-feriados/issues)
+- [Documentación](https://github.com/GerardoLucero/mx-feriados#readme)
 
