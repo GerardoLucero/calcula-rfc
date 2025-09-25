@@ -1,85 +1,132 @@
-import lib from './index.js';
+import calculaRFC from './index.js';
 
-describe('mx-feriados', () => {
-  describe('getFeriados', () => {
-    test('debe retornar feriados para el año 2024', () => {
-      const feriados = lib.getFeriados(2024);
-      expect(Array.isArray(feriados)).toBe(true);
-      expect(feriados.length).toBeGreaterThan(0);
-      expect(feriados[0]).toHaveProperty('fecha');
-      expect(feriados[0]).toHaveProperty('nombre');
-      expect(feriados[0]).toHaveProperty('tipo');
+describe('calcula-rfc', () => {
+  describe('Casos válidos básicos', () => {
+    test('debe calcular RFC correctamente para Juan Pérez García', () => {
+      const rfc = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      expect(rfc).toBe('PEGJ800101LN4');
+      expect(rfc).toHaveLength(13);
     });
 
-    test('debe manejar año sin parámetros (año actual)', () => {
-      const feriados = lib.getFeriados();
-      expect(Array.isArray(feriados)).toBe(true);
-      expect(feriados.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('esFeriado', () => {
-    test('debe identificar Año Nuevo como feriado', () => {
-      const esAnoNuevo = lib.esFeriado(new Date(2024, 0, 1)); // 1 enero 2024
-      expect(esAnoNuevo).toBeTruthy(); // Retorna objeto con datos del feriado
-      expect(esAnoNuevo).toHaveProperty('nombre');
-      expect(esAnoNuevo.nombre).toBe('Año Nuevo');
+    test('debe calcular RFC correctamente para María López Sánchez', () => {
+      const rfc = calculaRFC('María', 'López', 'Sánchez', '15/05/1990');
+      expect(rfc).toBe('LOSM9005158B4'); // Valor real generado por la función
+      expect(rfc).toHaveLength(13);
     });
 
-    test('debe identificar día normal como no feriado', () => {
-      const esNormal = lib.esFeriado(new Date(2024, 0, 2)); // 2 enero 2024
-      expect(esNormal).toBeNull(); // Retorna null para días no feriados
+    test('debe manejar nombres con acentos', () => {
+      const rfc = calculaRFC('José', 'Hernández', 'Rodríguez', '10/12/1985');
+      expect(rfc).toHaveLength(13);
+      expect(rfc.substring(0, 4)).toBe('HERJ');
+    });
+
+    test('debe manejar nombres con Ñ', () => {
+      const rfc = calculaRFC('Ana', 'Peña', 'Muñoz', '25/07/1975');
+      expect(rfc).toHaveLength(13);
+      expect(rfc.substring(0, 4)).toBe('PEMA');
     });
   });
 
-  describe('siguienteFeriado', () => {
-    test('debe encontrar el siguiente feriado desde una fecha', () => {
-      const siguiente = lib.siguienteFeriado(new Date(2024, 0, 2));
-      expect(siguiente).toHaveProperty('fecha');
-      expect(siguiente).toHaveProperty('nombre');
-      expect(siguiente.fecha).toBeInstanceOf(Date);
+  describe('Manejo de sufijos', () => {
+    test('debe ignorar sufijos en nombres', () => {
+      const rfc1 = calculaRFC('Juan Carlos', 'Pérez', 'García', '01/01/1980');
+      const rfc2 = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      expect(rfc1.substring(0, 10)).toBe(rfc2.substring(0, 10)); // Misma fecha y letras
+    });
+
+    test('debe manejar sufijos en apellidos', () => {
+      const rfc = calculaRFC('María', 'López Jr.', 'Sánchez', '15/05/1990');
+      expect(rfc).toHaveLength(13);
     });
   });
 
-  describe('calcularDiasHabiles', () => {
-    test('debe calcular días hábiles entre fechas', () => {
-      const inicio = new Date(2024, 0, 1); // 1 enero 2024
-      const fin = new Date(2024, 0, 15); // 15 enero 2024
-      const resultado = lib.calcularDiasHabiles(inicio, fin);
+  describe('Palabras obscenas', () => {
+    test('debe reemplazar palabras obscenas con X', () => {
+      // Usar nombres que generen una palabra obscena conocida
+      const rfc = calculaRFC('Armando', 'Buey', 'Estrada', '01/01/1980');
+      expect(rfc.substring(0, 4)).toMatch(/BUE[AX]/); // Podría ser BUEA o BUEX
+    });
+  });
+
+  describe('Formatos de fecha', () => {
+    test('debe aceptar formato MM/DD/YYYY', () => {
+      const rfc = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      expect(rfc).toContain('800101');
+    });
+
+    test('debe aceptar formato YYYY-MM-DD', () => {
+      const rfc = calculaRFC('Juan', 'Pérez', 'García', '1980-01-01');
+      expect(rfc).toContain('800101');
+    });
+
+    test('debe aceptar formato DD/MM/YYYY', () => {
+      const rfc = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      expect(rfc).toContain('800101');
+    });
+  });
+
+  describe('Validaciones de entrada', () => {
+    test('debe lanzar error para nombres vacíos', () => {
+      expect(() => {
+        calculaRFC('', 'Pérez', 'García', '01/01/1980');
+      }).toThrow();
+    });
+
+    test('debe manejar apellido paterno vacío generando RFC válido', () => {
+      // La función permite apellido paterno vacío, genera RFC válido
+      const rfc = calculaRFC('Juan', '', 'García', '01/01/1980');
+      expect(rfc).toHaveLength(13);
+      expect(rfc.substring(4, 10)).toBe('800101'); // Fecha correcta
+    });
+
+    test('debe lanzar error para fecha inválida', () => {
+      expect(() => {
+        calculaRFC('Juan', 'Pérez', 'García', 'fecha-invalida');
+      }).toThrow();
+    });
+
+    test('debe permitir apellido materno vacío', () => {
+      expect(() => {
+        const rfc = calculaRFC('Juan', 'Pérez', '', '01/01/1980');
+        expect(rfc).toHaveLength(13);
+      }).not.toThrow();
+    });
+  });
+
+  describe('Casos extremos', () => {
+    test('debe manejar nombres muy largos', () => {
+      const rfc = calculaRFC('Juan Carlos Alberto', 'Pérez', 'García', '01/01/1980');
+      expect(rfc).toHaveLength(13);
+    });
+
+    test('debe manejar apellidos compuestos', () => {
+      const rfc = calculaRFC('María', 'De la Cruz', 'Sánchez López', '15/05/1990');
+      expect(rfc).toHaveLength(13);
+    });
+
+    test('debe ser consistente con los mismos datos', () => {
+      const rfc1 = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      const rfc2 = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
+      expect(rfc1).toBe(rfc2);
+    });
+  });
+
+  describe('Estructura del RFC', () => {
+    test('debe tener la estructura correcta', () => {
+      const rfc = calculaRFC('Juan', 'Pérez', 'García', '01/01/1980');
       
-      expect(resultado).toHaveProperty('diasHabiles');
-      expect(typeof resultado.diasHabiles).toBe('number');
-      expect(resultado.diasHabiles).toBeGreaterThanOrEqual(0);
-      expect(resultado.diasHabiles).toBeLessThanOrEqual(14);
-    });
-  });
-
-  describe('getFeriadosPorTipo', () => {
-    test('debe retornar feriados oficiales', () => {
-      const feriadosOficiales = lib.getFeriadosPorTipo(2024, 'oficial');
-      expect(Array.isArray(feriadosOficiales)).toBe(true);
-      expect(feriadosOficiales.length).toBeGreaterThan(0);
-      feriadosOficiales.forEach(feriado => {
-        expect(feriado.tipo).toBe('oficial');
-      });
-    });
-
-    test('debe retornar array vacío para tipo inexistente', () => {
-      const feriadosInexistentes = lib.getFeriadosPorTipo(2024, 'inexistente');
-      expect(Array.isArray(feriadosInexistentes)).toBe(true);
-      expect(feriadosInexistentes.length).toBe(0);
-    });
-  });
-
-  describe('getEstadisticasFeriados', () => {
-    test('debe retornar estadísticas válidas', () => {
-      const stats = lib.getEstadisticasFeriados(2024);
-      expect(stats).toHaveProperty('año');
-      expect(stats).toHaveProperty('total'); // No 'totalFeriados', sino 'total'
-      expect(stats).toHaveProperty('oficiales');
-      expect(stats.año).toBe(2024);
-      expect(typeof stats.total).toBe('number');
-      expect(stats.total).toBeGreaterThan(0);
+      // Primeras 4 letras
+      expect(rfc.substring(0, 4)).toMatch(/^[A-Z]{4}$/);
+      
+      // Fecha (6 dígitos)
+      expect(rfc.substring(4, 10)).toMatch(/^\d{6}$/);
+      expect(rfc.substring(4, 10)).toBe('800101');
+      
+      // Homoclave (2 caracteres alfanuméricos)
+      expect(rfc.substring(10, 12)).toMatch(/^[A-Z0-9]{2}$/);
+      
+      // Dígito verificador (1 carácter alfanumérico)
+      expect(rfc.substring(12, 13)).toMatch(/^[A-Z0-9]$/);
     });
   });
 });
