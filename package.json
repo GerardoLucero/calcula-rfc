@@ -1,8 +1,8 @@
 {
-  "name": "calculadora-isr",
-  "version": "1.0.1",
+  "name": "calcula-rfc",
+  "version": "2.0.3",
   "type": "module",
-  "description": "Calculadora completa de ISR (Impuesto Sobre la Renta) mexicano con tarifas actualizadas",
+  "description": "Librería para calcular el RFC (Registro Federal de Contribuyentes) mexicano con homoclave de personas físicas",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -17,47 +17,39 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix",
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "version:major": "npm version major",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test && npm run lint && npm run build:prod"
   },
   "keywords": [
+    "rfc",
     "mexico",
-    "mexican",
-    "mx",
-    "isr",
-    "impuesto",
-    "renta",
-    "tax",
-    "calculator",
-    "fiscal",
+    "registro-federal-contribuyentes",
+    "homoclave",
     "sat",
-    "tarifa",
-    "nomina"
+    "fiscal",
+    "validacion",
+    "calculo",
+    "persona-fisica",
+    "contribuyente"
   ],
-  "author": {
-    "name": "Gerardo Lucero",
-    "email": "tu-email@ejemplo.com"
-  },
+  "author": "Gerardo Lucero",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GerardoLucero/calculadora-isr.git"
+    "url": "https://github.com/GerardoLucero/calcula-rfc.git"
   },
   "bugs": {
-    "url": "https://github.com/GerardoLucero/calculadora-isr/issues"
+    "url": "https://github.com/GerardoLucero/calcula-rfc/issues"
   },
-  "homepage": "https://github.com/GerardoLucero/calculadora-isr#readme",
+  "homepage": "https://github.com/GerardoLucero/calcula-rfc#readme",
   "engines": {
     "node": ">=14.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.23.0",
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
     "@eslint/js": "^8.57.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
@@ -65,24 +57,25 @@
     "microbundle": "^0.15.1"
   },
   "dependencies": {
-    "dayjs": "^1.11.18"
+    "dayjs": "^1.11.13"
   },
   "jest": {
     "testEnvironment": "node",
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    },
     "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js"
+      "src/**/*.{js,ts}",
+      "!src/**/*.test.{js,ts}",
+      "!src/**/*.spec.{js,ts}"
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 85,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
       }
+    },
+    "transform": {
+      "^.+\\.[jt]sx?$": "babel-jest"
     }
   }
 }
