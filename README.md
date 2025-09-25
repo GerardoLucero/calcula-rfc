@@ -2,6 +2,12 @@
 <!-- DONATIONS-START -->
 ## 💖 Apoya el Ecosistema Mexicano OSS
 
+<!-- BADGES-DONATIONS-START -->
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Donate-orange?logo=ko-fi)](https://ko-fi.com/gerardolucero)
+[![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-yellow?logo=buy-me-a-coffee)](https://buymeacoffee.com/lucerorios0)
+<!-- BADGES-DONATIONS-END -->
+
+
 Si estos paquetes te ayudan (RFC, ISR, Nómina, Bancos, Feriados, Nombres, Códigos Postales, Validadores), considera invitarme un café o apoyar el mantenimiento:
 
 - [Ko-fi](https://ko-fi.com/gerardolucero)
