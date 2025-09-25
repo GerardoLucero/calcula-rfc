@@ -1,6 +1,6 @@
 {
   "name": "calculadora-isr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Calculadora completa de ISR (Impuesto Sobre la Renta) mexicano con tarifas actualizadas",
   "main": "dist/index.js",
