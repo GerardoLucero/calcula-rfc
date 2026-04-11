@@ -6,6 +6,7 @@
 <!-- BADGES-DONATIONS-END -->
 
 [![npm version](https://badge.fury.io/js/calcula-rfc.svg)](https://badge.fury.io/js/calcula-rfc)
+[![npm downloads](https://img.shields.io/npm/dm/calcula-rfc.svg)](https://www.npmjs.com/package/calcula-rfc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/GerardoLucero/calcula-rfc/workflows/Publish%20to%20NPM/badge.svg)](https://github.com/GerardoLucero/calcula-rfc/actions)
 [![Coverage Status](https://coveralls.io/repos/github/GerardoLucero/calcula-rfc/badge.svg?branch=main)](https://coveralls.io/github/GerardoLucero/calcula-rfc?branch=main)
