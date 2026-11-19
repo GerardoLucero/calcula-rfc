@@ -1,26 +1,22 @@
 {
   "name": "calcula-rfc",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "type": "module",
   "description": "Librería para calcular el RFC (Registro Federal de Contribuyentes) mexicano con homoclave de personas físicas",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
   "scripts": {
-    "build": "microbundle --no-compress",
-    "build:prod": "microbundle",
+    "build": "tsup src/index.js --format esm,cjs --dts --target node20 --clean",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run test && npm run lint && npm run build:prod"
+    "prepublishOnly": "npm test && npm run lint && npm run build"
   },
   "keywords": [
     "rfc",
@@ -45,7 +41,7 @@
   },
   "homepage": "https://github.com/GerardoLucero/calcula-rfc#readme",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -54,7 +50,8 @@
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
-    "microbundle": "^0.15.1"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "dayjs": "^1.11.13"
@@ -77,5 +74,23 @@
     "transform": {
       "^.+\\.[jt]sx?$": "babel-jest"
     }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }
