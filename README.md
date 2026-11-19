@@ -1,22 +1,15 @@
 # calcula-rfc
 
-Librería moderna para calcular el RFC (Registro Federal de Contribuyentes) mexicano con homoclave de personas físicas, siguiendo el algoritmo oficial del SAT.
+Calcula y valida el RFC (Registro Federal de Contribuyentes) de personas físicas en México: las cuatro letras, la fecha, la homoclave y el dígito verificador, según el algoritmo que publica el SAT.
 
-[![npm version](https://badge.fury.io/js/calcula-rfc.svg)](https://badge.fury.io/js/calcula-rfc)
-[![npm downloads](https://img.shields.io/npm/dm/calcula-rfc.svg)](https://www.npmjs.com/package/calcula-rfc)
+[![npm](https://img.shields.io/npm/v/calcula-rfc.svg)](https://www.npmjs.com/package/calcula-rfc)
+[![CI](https://github.com/GerardoLucero/calcula-rfc/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLucero/calcula-rfc/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/GerardoLucero/calcula-rfc/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/GerardoLucero/calcula-rfc/actions/workflows/ci-cd.yml)
 
-## Features
-
-- **Algoritmo oficial del SAT** — basado en el documento "IFAI 0610100135506 065"
-- **Cálculo completo** — incluye homoclave y dígito verificador
-- **Manejo de acentos** — normaliza automáticamente caracteres especiales
-- **Validación de palabras obscenas** — reemplaza automáticamente según lista oficial
-- **Múltiples formatos de fecha** — soporta MM/DD/YYYY, YYYY-MM-DD, DD/MM/YYYY
-- **TypeScript ready** — incluye definiciones de tipos
-- **Zero dependencies** — solo usa dayjs (más seguro que moment.js)
-- **Cobertura de tests del 100%**
+- Sin dependencias.
+- Funciona con `import` y `require` en Node 20 o superior, y en navegadores con un bundler.
+- Tipos de TypeScript incluidos.
+- Cada versión se publica desde GitHub Actions con [procedencia firmada](https://docs.npmjs.com/generating-provenance-statements).
 
 ## Instalación
 
@@ -24,125 +17,95 @@ Librería moderna para calcular el RFC (Registro Federal de Contribuyentes) mexi
 npm install calcula-rfc
 ```
 
-## Uso
+## Calcular un RFC
 
-```javascript
-// ES6 Modules
+```js
+import { calculaRFC } from 'calcula-rfc';
+// o: const { calculaRFC } = require('calcula-rfc');
+
+calculaRFC({
+  nombre: 'Eliud',
+  apellidoPaterno: 'Orozco',
+  apellidoMaterno: 'Gómez',
+  fechaNacimiento: '1952-07-11'
+});
+// 'OOGE520711151'
+```
+
+También acepta argumentos posicionales y la exportación por defecto:
+
+```js
 import calculaRFC from 'calcula-rfc';
 
-// CommonJS
-const calculaRFC = require('calcula-rfc');
+calculaRFC('María Luisa', 'Ramírez', 'Sánchez', '13/12/1970');
+// 'RASL701213LM2'
 ```
 
-### Ejemplos básicos
+### Fecha de nacimiento
 
-```javascript
-// Persona con ambos apellidos
-const rfc1 = calculaRFC('JUAN CARLOS', 'PEREZ', 'GOMEZ', '01/15/1985');
-console.log(rfc1); // PEGJ850115AB1
+| Formato | Ejemplo |
+|---|---|
+| `AAAA-MM-DD` | `'1970-12-13'` |
+| `DD/MM/AAAA` (formato mexicano) | `'13/12/1970'` |
+| Objeto `Date` | `new Date(1970, 11, 13)` |
 
-// Persona con solo apellido paterno
-const rfc2 = calculaRFC('MARIA', 'LOPEZ', '', '12/25/1990');
-console.log(rfc2); // LOMA901225XY2
+Cualquier otro formato, o una fecha que no existe en el calendario, lanza un error. La librería no adivina: `'12/31/1990'` no se interpreta como fecha de EE. UU., sino como el día 12 del mes 31, y se rechaza.
 
-// Persona con solo apellido materno
-const rfc3 = calculaRFC('CARLOS', '', 'HERNANDEZ', '06/10/1988');
-console.log(rfc3); // HECA880610ZB3
+### Reglas que aplica
+
+| Caso | Ejemplo | Resultado |
+|---|---|---|
+| Nombre compuesto con María o José: se usa el segundo nombre | María Luisa Ramírez Sánchez | `RASL…` |
+| Partículas en apellidos (de, la, del, Mc, Von, …) | Josué Zarzosa de la Torre | `ZATJ…` |
+| Apellido paterno de una o dos letras | Ernesto Ek Rivera | `ERER…` |
+| Un solo apellido | Gerarda Zafra | `ZAGE701213920` |
+| Palabra inconveniente: la última letra cambia a X | Ingrid Bueno Ezquerra | `BUEX701213LT1` |
+| Ñ en la homoclave (no equivale a N) | Juan Muñoz Ortega, 15/01/1985 | `MUOJ850115T67` |
+
+## Validar un RFC
+
+```js
+import { validarRFC } from 'calcula-rfc';
+
+validarRFC('AECS211112JPA');
+// { valido: true, tipo: 'fisica', errores: [] }
+
+validarRFC('APU640930KV9');
+// { valido: true, tipo: 'moral', errores: [] }
+
+validarRFC('XAXX010101000');
+// { valido: true, tipo: 'generico', errores: [] }
+
+validarRFC('AECS211112JP1');
+// { valido: false, tipo: 'fisica', errores: ['El digito verificador no coincide (se esperaba A)'] }
 ```
 
-### Manejo de acentos y caracteres especiales
+Revisa la estructura (persona física de 13 caracteres, moral de 12 o genérico del SAT), que la fecha exista y que el dígito verificador sea correcto. Ignora mayúsculas, espacios y guiones.
 
-```javascript
-// La librería normaliza automáticamente los acentos
-const rfc = calculaRFC('JOSÉ MARÍA', 'PÉREZ', 'LÓPEZ', '05/15/1987');
-console.log(rfc); // PELJ870515CD4
-
-// También maneja la letra Ñ
-const rfcÑ = calculaRFC('ANTONIO', 'MUÑOZ', 'PEÑA', '08/30/1992');
-console.log(rfcÑ); // MUPA920830EF5
-```
-
-### Diferentes formatos de fecha
-
-```javascript
-// Formato MM/DD/YYYY (recomendado)
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '01/15/1985');
-
-// Formato YYYY-MM-DD (ISO)
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '1985-01-15');
-
-// Formato DD/MM/YYYY
-calculaRFC('JUAN', 'PEREZ', 'LOPEZ', '15/01/1985');
-```
+`validarRFC` confirma que un RFC está **bien formado**. No consulta el padrón del SAT, así que no garantiza que el RFC esté registrado.
 
 ## API
 
-### `calculaRFC(nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento)`
+| Función | Devuelve |
+|---|---|
+| `calculaRFC(datos)` o `calculaRFC(nombre, apellidoPaterno, apellidoMaterno, fechaNacimiento)` | RFC de 13 caracteres |
+| `validarRFC(rfc)` | `{ valido, tipo, errores }` |
+| `calcularHomoclave(nombre, apellidoPaterno, apellidoMaterno)` | Homoclave de 2 caracteres, por ejemplo `'T6'` |
+| `calcularDigitoVerificador(rfcSinDigito)` | Dígito verificador para 12 caracteres (física) u 11 (moral) |
 
-Calcula el RFC completo de una persona física.
+`calculaRFC` lanza un `Error` si falta el nombre, si no hay ningún apellido, si la fecha no es válida o si el nombre tiene caracteres que el algoritmo no contempla.
 
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `nombres` | `string` | Sí | Nombres de la persona |
-| `apellidoPaterno` | `string` | Condicional | Requerido si no hay materno |
-| `apellidoMaterno` | `string` | Condicional | Requerido si no hay paterno |
-| `fechaNacimiento` | `string` | Sí | Fecha de nacimiento en formato válido |
+## Exactitud
 
-**Retorna:** `string` — RFC de 13 caracteres (4 letras + 6 dígitos + 3 alfanuméricos). Ejemplo: `PEGJ850115AB1`.
+- La lista de palabras inconvenientes es la del RFC (41 palabras), que es distinta de la de CURP.
+- Las pruebas usan casos de referencia de [rfc-facil](https://github.com/josketres/rfc-facil), la implementación más usada del algoritmo del SAT, incluidos RFC completos, homoclaves con Ñ y & y un dígito verificador `A`.
+- El SAT puede asignar una homoclave distinta en casos de homonimia. Por eso el RFC oficial de una persona es el que aparece en su Constancia de Situación Fiscal.
 
-Lanza error si nombres está vacío, ambos apellidos están vacíos, o la fecha es inválida.
+## Limitaciones
 
-### Manejo de sufijos
-
-```javascript
-// Ignora "MARIA" en nombres
-const rfc1 = calculaRFC('MARIA GUADALUPE', 'GARCIA', 'LOPEZ', '01/01/1990');
-
-// Ignora "DE", "DEL", "LA" en apellidos
-const rfc3 = calculaRFC('PEDRO', 'DE LA CRUZ', 'MARTINEZ', '12/12/1985');
-```
-
-## Estructura del RFC
-
-```
-P E G J 85 01 15 A B 1
-│ │ │ │  │  │  │  │ │ │
-│ │ │ │  │  │  │  │ │ └─ Dígito verificador
-│ │ │ │  │  │  │  └─┴─── Homoclave (2 caracteres)
-│ │ │ │  │  └──┴──────── Día de nacimiento
-│ │ │ │  └─────────────── Mes de nacimiento
-│ │ │ └────────────────── Año de nacimiento (2 dígitos)
-│ │ └─────────────────── Primera letra del nombre
-│ └───────────────────── Primera vocal interna del apellido paterno
-└─────────────────────── Primera letra del apellido paterno
-```
-
-## Seguridad
-
-- Reemplazado moment.js por dayjs (sin vulnerabilidades conocidas)
-- Dependencias actualizadas a versiones modernas
-- Sin dependencias vulnerables según npm audit
-
-## Testing
-
-```bash
-npm test
-npm run test:coverage
-npm run test:watch
-```
-
-## Apoyo
-
-Proyecto de código abierto mantenido en mi tiempo libre. Si te fue útil y quieres agradecerlo:
-
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/gerardolucero)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/lucerorios0)
+- Solo calcula RFC de personas físicas. Para personas morales solo valida.
+- Un RFC calculado coincide con el oficial en la gran mayoría de los casos, pero no lo sustituye.
 
 ## Licencia
 
-MIT © [Gerardo Lucero](https://github.com/GerardoLucero), ver [LICENSE](LICENSE).
-
----
-
-- [calcula-curp](https://github.com/GerardoLucero/calcula-curp) — Calcula la CURP mexicana
-- [validador-fiscal-mx](https://github.com/GerardoLucero/validador-fiscal-mx) — Valida RFC, CURP y NSS
+MIT

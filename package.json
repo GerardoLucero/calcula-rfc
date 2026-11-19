@@ -1,8 +1,8 @@
 {
   "name": "calcula-rfc",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "type": "module",
-  "description": "Librería para calcular el RFC (Registro Federal de Contribuyentes) mexicano con homoclave de personas físicas",
+  "description": "Calcula y valida el RFC de personas fisicas en Mexico (homoclave y digito verificador, algoritmo del SAT). Sin dependencias.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,15 +20,13 @@
   },
   "keywords": [
     "rfc",
-    "mexico",
-    "registro-federal-contribuyentes",
-    "homoclave",
     "sat",
-    "fiscal",
+    "mexico",
+    "homoclave",
+    "digito-verificador",
     "validacion",
-    "calculo",
-    "persona-fisica",
-    "contribuyente"
+    "contribuyente",
+    "persona-fisica"
   ],
   "author": "Gerardo Lucero",
   "license": "MIT",
@@ -52,9 +50,6 @@
     "jest": "^29.7.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "dayjs": "^1.11.13"
   },
   "jest": {
     "testEnvironment": "node",
